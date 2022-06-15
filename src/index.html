@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Multi-User Video Call</title>
+
+        <meta content="width=device-width, initial-scale=1" name="viewport" />
+
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+        <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+        <link rel='stylesheet' href='assets/css/app.css' type="text/css">
+        <script type="application/javascript">
+            /*eslint-disable no-empty-label */
+            function start(){
+                var r = document.getElementById("result");
+            if("webkitSpeechRecognition" in window){
+                var speechRecognizer = new webkitSpeechRecognition();
+                speechRecognizer.continuous = true;
+                speechRecognizer.interimResults = true;
+                speechRecognizer.lang = "en-US";
+                speechRecognizer.start();
+                
+                var finalTranscripts = "";
+                speechRecognizer.onresult = function(event){
+                    var interimTranscripts = "";
+                    for(var i=event.resultIndex; i<event.results.length; i++){
+                        var transcript = event.results[i][0].transcript;
+                        transcript.replace("\n", "<br>");
+                        if(event.results[i].isFinal){
+                            finalTranscripts += transcript;
+                        }
+                        else{
+                            interimTranscripts += transcript;
+                        }
+                        r.innerHTML = finalTranscripts + interimTranscripts;
+						sendmessage(finalTranscripts);
+                    }
+                };
+                speechRecognizer.onerror = function(event){
+                };
+
+            }
+            else{
+                r.innerHTML = "Your browser does not support that.";
+            }
+            }
+        </script>
+        <script src='/socket.io/socket.io.js'></script>
+        <script type="module" src='assets/js/rtc.js'></script>
+        <script type="module" src='assets/js/events.js'></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/webrtc-adapter/7.3.0/adapter.min.js" integrity="sha256-2qQheewaqnZlXJ3RJRghVUwD/3fD9HNqxh4C+zvgmF4=" crossorigin="anonymous"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/moment.min.js"></script>
+        <script src='https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/1.3.8/FileSaver.min.js'></script>
+        <script src='https://cdn.rawgit.com/yahoo/xss-filters/master/dist/xss-filters.js'></script>
+        <script src='assets/js/autolink.js'></script>
+		<script type='text/javascript'>
+    //Trigger your event every 3 seconds
+    setInterval(function () { document.getElementById('chat-input').click();  }, 10000); 
+</script>
+<script type='text/javascript'>
+    //Trigger your event every 3 seconds
+    setInterval(start, 10000); 
+    setInterval(start, 10000); 
+</script>
+    </head>
+
+    <body onload="javascript:start()">
+        <div class="custom-modal" id='recording-options-modal'>
+            <div class="custom-modal-content">
+                <div class="row text-center">
+                    <div class="col-md-6 mb-2">
+                        <span class="record-option" id='record-video'>Record video</span>
+                    </div>
+                    <div class="col-md-6 mb-2">
+                        <span class="record-option" id='record-screen'>Record screen</span>
+                    </div>
+                </div>
+
+                <div class="row mt-3">
+                    <div class="col-md-12 text-center">
+                        <button class="btn btn-outline-danger" id='closeModal'>Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        
+        <nav class="navbar fixed-top rounded-0 d-print-none">
+            <div class="text-white"><span style="font-size:30px;cursor:pointer; font-size:14px; font-family:verdana" onclick="openNav()"><!--<img src="https://texttosignlanguage.s3.jp-tok.cloud-object-storage.appdomain.cloud/ibm.JPG" height="20" width="50" /> -->&#9776;&nbsp;&nbsp;&nbsp;aelf Zoom <span style="font-size:10px;">- Look beyond the Horizon</span></div>	
+			
+
+	
+	<div class="row pull-right room-comm" hidden>
+			
+<form>
+    <input type="text" class="txt" size="37" placeholder="Type you text here for Voice Conversion">
+    <select hidden>
+    </select>
+    <div class="controls">
+      <button id="play" type="submit" hidden>Play</button>
+    </div>
+    </form><script src='assets/js/script.js'></script>
+
+			
+                <button class="btn btn-sm rounded-0 btn-no-effect" id='toggle-video' title="Hide Video">
+                    <i class="fa fa-video text-white"></i>
+                </button>
+
+                <button class="btn btn-sm rounded-0 btn-no-effect" id='toggle-mute' title="Mute">
+                    <i class="fa fa-microphone-alt text-white"></i>
+                </button>
+
+                <button class="btn btn-sm rounded-0 btn-no-effect" id='share-screen' title="Share screen">
+                    <i class="fa fa-desktop text-white"></i>
+                </button>
+
+                <button class="btn btn-sm rounded-0 btn-no-effect" id='record' title="Record">
+                    <i class="fa fa-dot-circle text-white"></i>
+                </button>
+
+                <button class="btn btn-sm text-white pull-right btn-no-effect" id='toggle-chat-pane' title='Subtitle'>
+                    <img src="https://texttosignlanguage.s3.jp-tok.cloud-object-storage.appdomain.cloud/subtitle.JPG" width="20" height="19"/> <span class="badge badge-danger very-small font-weight-lighter" id='new-chat-notification' hidden>New</span>
+                </button>
+				<button class="btn btn-sm text-white pull-right btn-no-effect" id='toggle-chat-pane1' title='Chat'>
+                    <i class="fa fa-comment"></i> <span class="badge badge-danger very-small font-weight-lighter" id='new-chat-notification1' hidden>New</span>
+                </button>
+                
+                <button class="btn btn-sm text-white pull-right btn-no-effect" id='toggle-chat-pane2' title='Attentiveness' >
+                    <img src="https://texttosignlanguage.s3.jp-tok.cloud-object-storage.appdomain.cloud/attentiveness.jpg" width="20" height="19"/> <span class="badge badge-danger very-small font-weight-lighter" id='new-chat-notification' hidden>New</span>
+                </button>
+				
+				<button class="btn btn-sm text-white pull-right btn-no-effect" title='View Recordings' >
+                    <a href="https://viewlytics.saurabhksinha90.repl.co/videos"><img src="https://texttosignlanguage.s3.jp-tok.cloud-object-storage.appdomain.cloud/videorecordings.png" width="20" height="19"/> </a>
+                </button>	
+                
+                <button class="btn btn-sm rounded-0 btn-no-effect text-white">
+                    <a href="/" class="text-white text-decoration-none"><i class="fa fa-sign-out-alt text-white" title="Leave Meeting"></i></a>
+                </button>
+                
+                <button class="btn btn-sm rounded-0 btn-no-effect text-white" title="End Meeting">
+                    <a href="/" class="text-white text-decoration-none"><img src="https://texttosignlanguage.s3.jp-tok.cloud-object-storage.appdomain.cloud/end.png" width="20" height="19"/></a>
+                </button>
+            </div>
+
+        </nav>
+
+        <div class="container-fluid" id='room-create' hidden>
+        	<div class="row">
+                <div class="col-12 mt-5 text-right">Looking to Create new Tenant. <a href="#">Click Here!</a></div>
+            </div>
+            <div class="row">
+                <div class="col-12 h2 mt-5 text-center"><br><br>Create Bridge</div>
+            </div>
+            
+            <div class="row mt-2">
+                <div class="col-12 text-center">
+                    <span class="form-text small text-danger" id='err-msg'></span>
+                </div>
+
+                <div class="col-12 col-md-4 offset-md-4 mb-3">
+                    <label for="room-name">Enter Bridge Name</label>
+                    <input type="text" id='room-name' class="form-control rounded-0" placeholder="Type Bridge Name Here">
+                </div>
+
+                <div class="col-12 col-md-4 offset-md-4 mb-3">
+                    <label for="your-name">Enter Your Name</label>
+                    <input type="text" id='your-name' class="form-control rounded-0" placeholder="Type Your Name Here">
+                </div>
+
+                <div class="col-12 col-md-4 offset-md-4 mb-3">
+                    <button id='create-room' class="btn btn-block rounded-0 btn-primary">Create Bridge</button>
+                </div>
+
+                <div class="col-12 col-md-4 offset-md-4 mb-3" id='room-created'></div>
+            </div>
+        </div>
+
+
+
+        <div class="container-fluid" id='username-set' hidden>
+            <div class="row">
+                <div class="col-12 h4 mt-5 text-center"><br><br>Join a Bridge</div>
+            </div>
+            
+            <div class="row mt-2">
+                <div class="col-12 text-center">
+                    <span class="form-text small text-danger" id='err-msg-username'></span>
+                </div>
+
+                <div class="col-12 col-md-4 offset-md-4 mb-3">
+                    <label for="username">Enter Your Name</label>
+                    <input type="text" id='username' class="form-control rounded-0" placeholder="Type Your Name Here">
+                </div>
+
+                <div class="col-12 col-md-4 offset-md-4 mb-3">
+                    <button id='enter-room' class="btn btn-block rounded-0 btn-primary">Join Bridge</button>
+                </div>
+            </div>
+        </div>
+
+
+        
+        <div class="container-fluid room-comm" hidden>
+            <div class="row">
+                <video class="local-video mirror-mode" id='local' volume='0' autoplay muted></video>
+            </div>
+			
+			
+            
+            <div class="row">
+                <div class="col-md-12 main" id='main-section'>                    
+                    <div class="row mt-2 mb-2" id='videos'></div>
+					
+                </div>
+
+                <div class="col-md-3 chat-col d-print-none mb-2 bg-dark" id='chat-pane' hidden>
+                    <div class="row">
+                        <div class="col-12 text-center h4 mb-3">Subtitle</div>
+                    </div>
+
+                    <div id='chat-messages'></div>
+
+                    <div class="row">
+					<button id='chat-input' style="font-size:10px; margin-left:10px; margin-right:210px; background-color:#0f62fe; color:white; font-size: 16px;      cursor: pointer; padding: 10px 61px;">Submit</button>
+						<button onclick="start()" style="font-size:10px;  margin-right:0px; background-color:#0f62fe; color:white; font-size: 16px;    cursor: pointer; position:absolute; right:0;padding: 10px 61px;" >Listen</button>
+                        <textarea id='result' class="form-control rounded-0 chat-box border-info" rows='3' placeholder=""></textarea>
+						
+                    </div>
+                </div>
+				<div class="col-md-3 chat-col d-print-none mb-2 bg-dark" id='chat-pane1' hidden>
+                    <div class="row">
+                        <div class="col-12 text-center h4 mb-3">Chat</div>
+                    </div>
+
+                    <div id='chat-messages1'></div>
+
+                    <div class="row">
+                        <textarea  id='saurabh' class="form-control rounded-0 chat-box border-info" rows='3' placeholder="Type here..."></textarea>
+						
+                    </div>
+                </div>
+                <div class="col-md-3 chat-col d-print-none mb-2 bg-dark" id='chat-pane2' hidden>
+                    <div class="row">
+                        <div class="col-12 text-center h4 mb-3">Attentiveness</div>
+                    </div>
+					<div style="background-color:white; margin-left:30px;margin-right:30px;padding-left:10px;">
+				<span style="color:black">Happiness Level: 0.7 <br><progress id='file' value='0.7' min='0' max='1'> </progress><br>Angerness Level:0.2 <br><progress id='file' value='0.2' min='0' max='1'> </progress><br>Contempt Level:0.2 <progress id='file' value='0.2' min='0' max='1'> </progress><br>Disgust Level: 0 <progress id='file' value='0' min='0' max='1'> </progress><br>Fear Level: 0.1 <progress id='file' value='0.1' min='0' max='1'> </progress><br>Neutral Level: 0.9 <progress id='file' value='0.9' min='0' max='1'> </progress><br>Sadness Level: 0.2 <progress id='file' value='0.2' min='0' max='1'> </progress><br>Surprise Level: 0.1 <br><progress id='file' value='0.1' min='0' max='1'> </progress><br><a href="https://viewlytics.saurabhksinha90.repl.co/render" target="_blank"><span style="color:blue; font-size:10px;">More Detail</span></a><br></span>
+					</div><br>
+					<div class="row">
+                        <div class="col-12 text-center h4 mb-3">Participants Consent</div>
+                    </div>
+					<div style="background-color:white; margin-left:30px;margin-right:30px;padding-left:10px;">
+				<span style="color:black"><table><tr><td><img src="https://texttosignlanguage.s3.jp-tok.cloud-object-storage.appdomain.cloud/Viral_2.jpg" style="border-radius: 50%" height="20" width="20"/> Viral Thakkar</td><td>&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://texttosignlanguage.s3.jp-tok.cloud-object-storage.appdomain.cloud/green.JPG" height="20" width="20"/></td></tr><tr><td><img src="https://texttosignlanguage.s3.jp-tok.cloud-object-storage.appdomain.cloud/photo.png" style="border-radius: 50%" height="20" width="20"/> Saurabh K Sinha</td><td>&nbsp;&nbsp;&nbsp;&nbsp;<img src="https://texttosignlanguage.s3.jp-tok.cloud-object-storage.appdomain.cloud/green.JPG" height="20" width="20"/></td></tr></span>
+					</div>
+                    <!--<div id='chat-messages1'></div>
+
+                    <div class="row">
+					
+					<button id='chat-input' style="font-size:10px; margin-left:10px; margin-right:210px; background-color:#0f62fe; color:white; font-size: 16px;      cursor: pointer; padding: 10px 61px;">Submit</button>
+						<button onclick="start()" style="font-size:10px;  margin-right:0px; background-color:#0f62fe; color:white; font-size: 16px;    cursor: pointer; position:absolute; right:0;padding: 10px 61px;" >Listen</button>
+                        <textarea id='result' class="form-control rounded-0 chat-box border-dark" rows='3' placeholder=""></textarea>
+						
+                    </div>-->
+                </div>
+            </div>
+        </div>
+    </body>
+</html>

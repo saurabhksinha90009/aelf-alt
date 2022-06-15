@@ -1,0 +1,30 @@
+{
+	"name": "HelloWorldNodeApp",
+	"version": "0.0.1",
+        "private": true,
+	"scripts": {
+		"start": "node src/app.js"
+	},
+	"dependencies": {
+		"express": "4.17.x",
+		"cfenv": "1.2.x",
+		"serve-favicon": "^2.5.0",
+        "socket.io": "^2.3.0",
+        "@sendgrid/mail": "^6.5.5",
+        "node-fetch": "^2.6.0",
+        "request": "^2.88.2",
+        "sendgrid": "^5.2.3",
+        "body-parser": "~1.13.2",
+         
+          "cf-deployment-tracker-client": "^0.0.8"
+	},
+	"repository": {},
+	"engines": {
+		"node": "10.x || 16.x"
+	},
+	"keywords": [
+    "LiveStream",
+    "Server"
+  ]
+}
+
