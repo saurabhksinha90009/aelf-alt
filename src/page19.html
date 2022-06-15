@@ -1,0 +1,51 @@
+<html>
+
+<body>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script>     
+
+    // Attach a submit handler to the form 
+  // Attach a submit handler to the form 
+
+
+$('#uploadForm').submit(function(e) {
+	var formData = new FormData();
+    formData.append("uploadFiles", $('[name="file"]')[0].files[0]);
+    e.preventDefault();
+    $.ajax({
+        url: $(this).attr("action"),
+        type: 'POST',
+      beforeSend: function(request) {
+          request.setRequestHeader("Content-Type","multipart/form-data");
+          request.setRequestHeader("Authorization", "Bearer " + "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkaWQ6ZXRocjoweDI3ZDMxYzdBOTJCNDA1QjcyQ2U4M2M5QkE5NjliMjkzMTQ0NGQxN2EiLCJpc3MiOiJ3ZWIzLXN0b3JhZ2UiLCJpYXQiOjE2NTQxNTgyMjMyNDMsIm5hbWUiOiJ0ZXN0In0.3cKPOvjiHCfrwFQEvLnmkJkJhmpTlJHbprCtkt7E0pY");
+        request.setRequestHeader("Content-Type", "multipart/form-data")
+        },
+        contentType: 'application/json; charset=utf-8',
+        data: JSON.stringify(formData).id,
+    dataType: 'application/json',
+        success: function( data, textStatus, jQxhr ){
+                    $('#response pre').html( JSON.stringify( data.id )  );
+                },
+                error: function( jqXhr, textStatus, errorThrown ){
+                    console.log( errorThrown );
+                }
+    });
+});
+
+    </script>
+<form id="uploadForm" action="https://api.web3.storage/upload" method="post" enctype="multipart/form-data" accept-charset="ISO-8859-1">   
+
+      <div class="inputFileCustom">
+        <input type="file" size="45" name="file" id="uploadFiles" accept="application/pdf"/>
+        <label for="uploadFiles">
+            <div class="ic-bt ic-bt-details ic-bt-text btn btn-border">
+            Choose a file
+            </div>
+        </label>
+    </div>
+
+    <input type="submit" value="Upload Button" class="btn btn-primary" />
+</form>
+    
+</body>
+</html>

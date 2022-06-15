@@ -1,0 +1,23 @@
+
+        success: function( data, textStatus, jQxhr ){
+                    $('#response pre').html( JSON.stringify( data.id )  );
+                },
+                error: function( jqXhr, textStatus, errorThrown ){
+                    console.log( errorThrown );
+                }
+    });<html>
+
+<body>
+Check Insights Status
+<input type="button" id="sub" value="Answer" />
+
+<script type="text/javascript">
+
+document.getElementById('sub').onclick = function(){
+
+let url="https://V-Platform.saurabhksinha90.repl.co/page3/?id="+JSON.stringify({name}) +name+{ name };
+window.location=url;
+};
+</script>
+</body>
+</html>
